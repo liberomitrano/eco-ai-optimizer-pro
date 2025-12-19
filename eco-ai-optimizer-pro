@@ -1,0 +1,79 @@
+import torch
+from torch.ao.quantization import quantize_dynamic
+import sys
+import os
+import time
+
+# ==========================================
+# ECO-AI OPTIMIZER PRO v2.0
+# Developed by: Libero Mitrano (13 years old)
+# Mission: Carbon-neutral AI infrastructure
+# ==========================================
+
+def get_model_size_mb(model):
+    """Calculates the real size of the model in Megabytes."""
+    torch.save(model.state_dict(), "temp.p")
+    size = os.path.getsize("temp.p")
+    os.remove("temp.p")
+    return size / (1024 * 1024)
+
+def optimize_model(model):
+    """
+    Advanced optimization using Dynamic Quantization.
+    Reduces weight precision from FP32 to INT8.
+    """
+    try:
+        print("\n[⚡] Starting Eco-AI Optimization...")
+        start_time = time.time()
+
+        # La magia: Cuantización de capas lineales
+        optimized_model = quantize_dynamic(
+            model, 
+            {torch.nn.Linear}, 
+            dtype=torch.qint8
+        )
+
+        end_time = time.time()
+        print(f"[✅] Optimization finished in {end_time - start_time:.4f} seconds.")
+        return optimized_model
+    
+    except Exception as e:
+        print(f"[❌] Error during optimization: {e}")
+        return None
+
+if __name__ == "__main__":
+    # 1. Creación de un modelo más pesado para notar la diferencia
+    print("--- ECO-AI LABS: SUSTAINABILITY TEST ---")
+    
+    class BigModel(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            # Creamos capas grandes para ver el ahorro real
+            self.fc1 = torch.nn.Linear(1024, 1024)
+            self.fc2 = torch.nn.Linear(1024, 1024)
+            self.fc3 = torch.nn.Linear(1024, 512)
+
+        def forward(self, x):
+            return self.fc3(self.fc2(self.fc1(x)))
+
+    raw_model = BigModel()
+    
+    # 2. Mediciones
+    size_before = get_model_size_mb(raw_model)
+    opt_model = optimize_model(raw_model)
+    size_after = get_model_size_mb(opt_model)
+    
+    # 3. Cálculo de impacto ambiental
+    reduction = ((size_before - size_after) / size_before) * 100
+    
+    print("\n" + "="*30)
+    print(f"📊 RESULTS:")
+    print(f"  - Size Before: {size_before:.2f} MB")
+    print(f"  - Size After:  {size_after:.2f} MB")
+    print(f"  - Efficiency:  {reduction:.1f}% Reduction")
+    print("="*30)
+    
+    if reduction > 50:
+        print("🌍 STATUS: GREAT IMPACT! You are saving massive energy.")
+    
+    print("\n[Eco-AI]: Small code, big change for the planet. 🌳")
